@@ -1,0 +1,213 @@
+{
+	"info": {
+		"_postman_id": "8a9b0c1d-2233-4455-6677-8899aabbccdd",
+		"name": "Position Doctor - User & Portfolio CRUD Module API Collection",
+		"description": "Postman API Collection for Position Doctor backend covering User CRUD and Portfolio CRUD modules.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "User CRUD Module",
+			"item": [
+				{
+					"name": "Create User - Success (201 Created)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"satoshi@positiondoctor.com\",\n  \"password\": \"plainTextPassword123\",\n  \"firstName\": \"Satoshi\",\n  \"lastName\": \"Nakamoto\",\n  \"role\": \"ROLE_USER\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "201 Created Response",
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"User created successfully\",\n  \"data\": {\n    \"id\": \"a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11\",\n    \"email\": \"satoshi@positiondoctor.com\",\n    \"firstName\": \"Satoshi\",\n    \"lastName\": \"Nakamoto\",\n    \"role\": \"ROLE_USER\",\n    \"enabled\": true,\n    \"createdAt\": \"2026-07-27T18:00:00\",\n    \"updatedAt\": \"2026-07-27T18:00:00\"\n  },\n  \"timestamp\": \"2026-07-27T18:00:00\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get User By ID - Success (200 OK)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK Response",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Success\",\n  \"data\": {\n    \"id\": \"a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11\",\n    \"email\": \"satoshi@positiondoctor.com\",\n    \"firstName\": \"Satoshi\",\n    \"lastName\": \"Nakamoto\",\n    \"role\": \"ROLE_USER\",\n    \"enabled\": true,\n    \"createdAt\": \"2026-07-27T18:00:00\",\n    \"updatedAt\": \"2026-07-27T18:00:00\"\n  },\n  \"timestamp\": \"2026-07-27T18:00:10\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get All Users - Success (200 OK)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK Response Array",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Success\",\n  \"data\": [\n    {\n      \"id\": \"a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11\",\n      \"email\": \"satoshi@positiondoctor.com\",\n      \"firstName\": \"Satoshi\",\n      \"lastName\": \"Nakamoto\",\n      \"role\": \"ROLE_USER\",\n      \"enabled\": true,\n      \"createdAt\": \"2026-07-27T18:00:00\",\n      \"updatedAt\": \"2026-07-27T18:00:00\"\n    }\n  ],\n  \"timestamp\": \"2026-07-27T18:00:15\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Update User - Success (200 OK)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"satoshi.updated@positiondoctor.com\",\n  \"firstName\": \"Satoshi\",\n  \"lastName\": \"Nakamoto\",\n  \"role\": \"ROLE_ADMIN\",\n  \"enabled\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK Response",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"User updated successfully\",\n  \"data\": {\n    \"id\": \"a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11\",\n    \"email\": \"satoshi.updated@positiondoctor.com\",\n    \"firstName\": \"Satoshi\",\n    \"lastName\": \"Nakamoto\",\n    \"role\": \"ROLE_ADMIN\",\n    \"enabled\": true,\n    \"createdAt\": \"2026-07-27T18:00:00\",\n    \"updatedAt\": \"2026-07-27T18:00:20\"\n  },\n  \"timestamp\": \"2026-07-27T18:00:20\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete User - Success (200 OK)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/users/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK Response",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"User deleted successfully\",\n  \"data\": null,\n  \"timestamp\": \"2026-07-27T18:00:25\"\n}"
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}

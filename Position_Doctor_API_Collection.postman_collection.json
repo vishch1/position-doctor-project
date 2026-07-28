@@ -1,0 +1,56 @@
+{
+	"info": {
+		"_postman_id": "d4e5f6a7-7788-9900-1122-33ddeeff0011",
+		"name": "Position Doctor - Complete Backend API Collection",
+		"description": "Comprehensive Postman API Collection for Position Doctor backend covering User, Portfolio, Position CRUD, Market Data, Diagnosis Engine, Recommendation Engine, Alert Engine, and Dashboard modules.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Dashboard Module",
+			"item": [
+				{
+					"name": "Get Executive Dashboard Summary - Success (200 OK)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/dashboard",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dashboard"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200 OK Aggregated Dashboard Response",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Success\",\n  \"data\": {\n    \"portfolioSummary\": {\n      \"totalPortfolioValue\": 15000.00,\n      \"totalUnrealizedPnL\": 1250.00,\n      \"todayPnL\": 1250.00\n    },\n    \"healthSummary\": {\n      \"overallHealthScore\": 85,\n      \"healthyPositions\": 3,\n      \"warningPositions\": 1,\n      \"criticalPositions\": 0\n    },\n    \"recentAlerts\": [\n      {\n        \"id\": \"e507d1ca-5e6f-6f98-d730-409976fb4c03\",\n        \"title\": \"Alert: AAPL Recommendation Changed to TIGHTEN_STOPLOSS\",\n        \"severity\": \"WARNING\"\n      }\n    ],\n    \"recommendations\": [\n      {\n        \"positionId\": \"d406c0b9-4d5b-5e87-c62f-398865ea3b02\",\n        \"symbol\": \"AAPL\",\n        \"recommendation\": \"HOLD\",\n        \"confidence\": 95,\n        \"reason\": \"Position health score is excellent (85/100).\"\n      }\n    ],\n    \"openPositions\": [\n      {\n        \"id\": \"d406c0b9-4d5b-5e87-c62f-398865ea3b02\",\n        \"symbol\": \"AAPL\",\n        \"status\": \"OPEN\"\n      }\n    ]\n  },\n  \"timestamp\": \"2026-07-28T15:36:00\"\n}"
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}
