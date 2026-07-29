@@ -1,11 +1,14 @@
 package com.vishakha.position_doctor_project.domain.portfolio.entity;
 
+import com.vishakha.position_doctor_project.common.converter.RiskLevelConverter;
 import com.vishakha.position_doctor_project.common.dto.RiskLevel;
 import com.vishakha.position_doctor_project.common.entity.BaseAuditEntity;
+import com.vishakha.position_doctor_project.domain.alert.entity.Alert;
 import com.vishakha.position_doctor_project.domain.position.entity.Position;
 import com.vishakha.position_doctor_project.domain.user.entity.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -79,12 +82,16 @@ public class Portfolio extends BaseAuditEntity {
     @Builder.Default
     private String currency = "USD";
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = RiskLevelConverter.class)
     @Column(name = "aggregated_risk_level", length = 30)
     @Builder.Default
-    private RiskLevel aggregatedRiskLevel = RiskLevel.UNKNOWN;
+    private RiskLevel aggregatedRiskLevel = RiskLevel.MODERATE;
 
     @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Position> positions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Alert> alerts = new ArrayList<>();
 }

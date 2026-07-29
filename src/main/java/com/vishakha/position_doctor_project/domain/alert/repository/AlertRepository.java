@@ -19,4 +19,8 @@ public interface AlertRepository extends JpaRepository<Alert, UUID> {
     List<Alert> findAllByOrderByCreatedAtDesc();
 
     Optional<Alert> findFirstByPositionIdOrderByCreatedAtDesc(UUID positionId);
+
+    void deleteByPortfolioId(UUID portfolioId);
+
+    void deleteByPositionId(UUID positionId);
 }

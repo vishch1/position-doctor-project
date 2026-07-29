@@ -38,6 +38,12 @@ public class PositionController {
         return new ResponseEntity<>(ApiResponse.success("Position created successfully", response), HttpStatus.CREATED);
     }
 
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<PositionResponse>>> getAllPositions() {
+        List<PositionResponse> response = positionService.getAllPositions();
+        return ResponseEntity.ok(ApiResponse.success("Positions retrieved successfully", response));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<PositionResponse>> getPositionById(@PathVariable UUID id) {
         PositionResponse response = positionService.getPositionById(id);

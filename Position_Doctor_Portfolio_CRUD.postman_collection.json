@@ -45,7 +45,7 @@
 						}
 					],
 					"cookie": [],
-					"body": "{\n  \"success\": true,\n  \"message\": \"Portfolio created successfully\",\n  \"data\": {\n    \"id\": \"c395b9a8-3c4a-4d76-b51f-287754d92a01\",\n    \"userId\": \"a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11\",\n    \"name\": \"Alpha High-Yield Growth Portfolio\",\n    \"description\": \"Core equity growth and technology long-term holdings\",\n    \"totalValue\": 0.0000,\n    \"totalUnrealizedPnL\": 0.0000,\n    \"currency\": \"USD\",\n    \"aggregatedRiskLevel\": \"UNKNOWN\",\n    \"createdAt\": \"2026-07-27T17:30:00\",\n    \"updatedAt\": \"2026-07-27T17:30:00\"\n  },\n  \"timestamp\": \"2026-07-27T17:30:00\"\n}"
+					"body": "{\n  \"success\": true,\n  \"message\": \"Portfolio created successfully\",\n  \"data\": {\n    \"id\": \"c395b9a8-3c4a-4d76-b51f-287754d92a01\",\n    \"userId\": \"a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11\",\n    \"name\": \"Alpha High-Yield Growth Portfolio\",\n    \"description\": \"Core equity growth and technology long-term holdings\",\n    \"totalValue\": 0.0000,\n    \"totalUnrealizedPnL\": 0.0000,\n    \"currency\": \"USD\",\n    \"aggregatedRiskLevel\": \"MODERATE\",\n    \"createdAt\": \"2026-07-27T17:30:00\",\n    \"updatedAt\": \"2026-07-27T17:30:00\"\n  },\n  \"timestamp\": \"2026-07-27T17:30:00\"\n}"
 				}
 			]
 		},

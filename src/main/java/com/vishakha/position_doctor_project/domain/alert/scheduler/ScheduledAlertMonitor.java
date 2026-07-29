@@ -15,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +35,7 @@ public class ScheduledAlertMonitor {
     private final AlertRepository alertRepository;
 
     @Scheduled(fixedRate = 30000)
+    @Transactional
     public void monitorPositionsForAlerts() {
         List<Position> openPositions = positionRepository.findByStatus(PositionStatus.OPEN);
 

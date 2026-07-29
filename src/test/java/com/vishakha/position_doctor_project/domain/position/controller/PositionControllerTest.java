@@ -118,6 +118,18 @@ class PositionControllerTest {
     }
 
     @Test
+    @DisplayName("GET /api/v1/positions - Success Scenario")
+    void testGetAllPositions_Success() throws Exception {
+        when(positionService.getAllPositions()).thenReturn(Collections.singletonList(sampleResponse));
+
+        mockMvc.perform(get("/api/v1/positions"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].id").value(samplePositionId.toString()))
+                .andExpect(jsonPath("$.data[0].symbol").value("AAPL"));
+    }
+
+    @Test
     @DisplayName("GET /api/v1/positions/{id} - Success Scenario")
     void testGetPositionById_Success() throws Exception {
         when(positionService.getPositionById(eq(samplePositionId))).thenReturn(sampleResponse);

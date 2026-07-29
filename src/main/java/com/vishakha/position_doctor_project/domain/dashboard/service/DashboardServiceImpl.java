@@ -1,6 +1,7 @@
 package com.vishakha.position_doctor_project.domain.dashboard.service;
 
 import com.vishakha.position_doctor_project.common.dto.PositionStatus;
+import com.vishakha.position_doctor_project.common.dto.RiskLevel;
 import com.vishakha.position_doctor_project.domain.alert.dto.AlertResponse;
 import com.vishakha.position_doctor_project.domain.alert.service.AlertService;
 import com.vishakha.position_doctor_project.domain.dashboard.dto.DashboardResponse;
@@ -104,6 +105,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private PositionResponse mapToPositionResponse(Position pos) {
+        RiskLevel risk = pos.getRiskLevel() != null ? pos.getRiskLevel() : RiskLevel.MODERATE;
         return PositionResponse.builder()
                 .id(pos.getId())
                 .portfolioId(pos.getPortfolio() != null ? pos.getPortfolio().getId() : null)
@@ -117,7 +119,7 @@ public class DashboardServiceImpl implements DashboardService {
                 .takeProfitPrice(pos.getTakeProfitPrice())
                 .unrealizedPnL(pos.getUnrealizedPnL())
                 .status(pos.getStatus())
-                .riskLevel(pos.getRiskLevel())
+                .riskLevel(risk)
                 .createdAt(pos.getCreatedAt())
                 .updatedAt(pos.getUpdatedAt())
                 .build();

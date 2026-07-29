@@ -1,12 +1,16 @@
 package com.vishakha.position_doctor_project.domain.position.entity;
 
+import com.vishakha.position_doctor_project.common.converter.RiskLevelConverter;
 import com.vishakha.position_doctor_project.common.dto.Exchange;
 import com.vishakha.position_doctor_project.common.dto.PositionStatus;
 import com.vishakha.position_doctor_project.common.dto.PositionType;
 import com.vishakha.position_doctor_project.common.dto.RiskLevel;
 import com.vishakha.position_doctor_project.common.entity.BaseAuditEntity;
+import com.vishakha.position_doctor_project.domain.alert.entity.Alert;
 import com.vishakha.position_doctor_project.domain.portfolio.entity.Portfolio;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -17,6 +21,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -27,6 +32,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -94,8 +101,12 @@ public class Position extends BaseAuditEntity {
     @Builder.Default
     private PositionStatus status = PositionStatus.OPEN;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = RiskLevelConverter.class)
     @Column(name = "risk_level", length = 30)
     @Builder.Default
-    private RiskLevel riskLevel = RiskLevel.UNKNOWN;
+    private RiskLevel riskLevel = RiskLevel.MODERATE;
+
+    @OneToMany(mappedBy = "position", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Alert> alerts = new ArrayList<>();
 }

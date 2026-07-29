@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vishakha.position_doctor_project.domain.alert.repository.AlertRepository;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
@@ -30,6 +32,7 @@ public class PositionServiceImpl implements PositionService {
 
     private final PositionRepository positionRepository;
     private final PortfolioRepository portfolioRepository;
+    private final AlertRepository alertRepository;
 
     @Override
     public PositionResponse createPosition(CreatePositionRequest request) {
@@ -48,7 +51,7 @@ public class PositionServiceImpl implements PositionService {
                 .stopLossPrice(request.getStopLossPrice())
                 .takeProfitPrice(request.getTakeProfitPrice())
                 .status(PositionStatus.OPEN)            // Rule: status = OPEN on creation
-                .riskLevel(RiskLevel.UNKNOWN)
+                .riskLevel(RiskLevel.MODERATE)
                 .build();
 
         Position savedPosition = positionRepository.save(position);
@@ -61,6 +64,14 @@ public class PositionServiceImpl implements PositionService {
         Position position = positionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Position", "id", id));
         return mapToResponse(position);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PositionResponse> getAllPositions() {
+        return positionRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -124,10 +135,12 @@ public class PositionServiceImpl implements PositionService {
     public void deletePosition(UUID id) {
         Position position = positionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Position", "id", id));
+        alertRepository.deleteByPositionId(id);
         positionRepository.delete(position);
     }
 
     private PositionResponse mapToResponse(Position position) {
+        RiskLevel risk = position.getRiskLevel() != null ? position.getRiskLevel() : RiskLevel.MODERATE;
         return PositionResponse.builder()
                 .id(position.getId())
                 .portfolioId(position.getPortfolio() != null ? position.getPortfolio().getId() : null)
@@ -141,7 +154,7 @@ public class PositionServiceImpl implements PositionService {
                 .stopLossPrice(position.getStopLossPrice())
                 .takeProfitPrice(position.getTakeProfitPrice())
                 .status(position.getStatus())
-                .riskLevel(position.getRiskLevel())
+                .riskLevel(risk)
                 .createdAt(position.getCreatedAt())
                 .updatedAt(position.getUpdatedAt())
                 .build();

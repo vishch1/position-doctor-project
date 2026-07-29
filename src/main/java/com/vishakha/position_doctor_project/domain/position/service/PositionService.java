@@ -16,6 +16,8 @@ public interface PositionService {
 
     PositionResponse getPositionById(UUID id);
 
+    List<PositionResponse> getAllPositions();
+
     List<PositionResponse> getPositionsByPortfolioId(UUID portfolioId);
 
     PositionResponse updatePosition(UUID id, UpdatePositionRequest request);

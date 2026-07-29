@@ -2,6 +2,7 @@ package com.vishakha.position_doctor_project.domain.portfolio.service;
 
 import com.vishakha.position_doctor_project.common.dto.RiskLevel;
 import com.vishakha.position_doctor_project.common.exception.ResourceNotFoundException;
+import com.vishakha.position_doctor_project.common.util.SecurityUtils;
 import com.vishakha.position_doctor_project.domain.portfolio.dto.CreatePortfolioRequest;
 import com.vishakha.position_doctor_project.domain.portfolio.dto.PortfolioResponse;
 import com.vishakha.position_doctor_project.domain.portfolio.dto.UpdatePortfolioRequest;
@@ -12,6 +13,8 @@ import com.vishakha.position_doctor_project.domain.user.repository.UserRepositor
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.vishakha.position_doctor_project.domain.alert.repository.AlertRepository;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,11 +31,21 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     private final PortfolioRepository portfolioRepository;
     private final UserRepository userRepository;
+    private final AlertRepository alertRepository;
 
     @Override
     public PortfolioResponse createPortfolio(CreatePortfolioRequest request) {
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", request.getUserId()));
+        String userEmail = SecurityUtils.getCurrentUserLogin().orElse(null);
+
+        User user = null;
+        if (userEmail != null && !userEmail.isBlank()) {
+            user = userRepository.findByEmail(userEmail).orElse(null);
+        }
+
+        if (user == null) {
+            user = userRepository.findAll().stream().findFirst()
+                    .orElseThrow(() -> new ResourceNotFoundException("User", "authenticatedUser", "current"));
+        }
 
         Portfolio portfolio = Portfolio.builder()
                 .user(user)
@@ -41,7 +54,7 @@ public class PortfolioServiceImpl implements PortfolioService {
                 .currency(request.getCurrency() != null && !request.getCurrency().isBlank() ? request.getCurrency() : "USD")
                 .totalValue(BigDecimal.ZERO)
                 .totalUnrealizedPnL(BigDecimal.ZERO)
-                .aggregatedRiskLevel(RiskLevel.UNKNOWN)
+                .aggregatedRiskLevel(RiskLevel.MODERATE)
                 .build();
 
         Portfolio savedPortfolio = portfolioRepository.save(portfolio);
@@ -89,10 +102,12 @@ public class PortfolioServiceImpl implements PortfolioService {
     public void deletePortfolio(UUID id) {
         Portfolio portfolio = portfolioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Portfolio", "id", id));
+        alertRepository.deleteByPortfolioId(id);
         portfolioRepository.delete(portfolio);
     }
 
     private PortfolioResponse mapToResponse(Portfolio portfolio) {
+        RiskLevel risk = portfolio.getAggregatedRiskLevel() != null ? portfolio.getAggregatedRiskLevel() : RiskLevel.MODERATE;
         return PortfolioResponse.builder()
                 .id(portfolio.getId())
                 .userId(portfolio.getUser() != null ? portfolio.getUser().getId() : null)
@@ -101,7 +116,7 @@ public class PortfolioServiceImpl implements PortfolioService {
                 .totalValue(portfolio.getTotalValue())
                 .totalUnrealizedPnL(portfolio.getTotalUnrealizedPnL())
                 .currency(portfolio.getCurrency())
-                .aggregatedRiskLevel(portfolio.getAggregatedRiskLevel())
+                .aggregatedRiskLevel(risk)
                 .createdAt(portfolio.getCreatedAt())
                 .updatedAt(portfolio.getUpdatedAt())
                 .build();

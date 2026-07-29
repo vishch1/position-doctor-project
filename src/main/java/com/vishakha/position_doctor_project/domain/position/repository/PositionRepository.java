@@ -2,6 +2,7 @@ package com.vishakha.position_doctor_project.domain.position.repository;
 
 import com.vishakha.position_doctor_project.common.dto.PositionStatus;
 import com.vishakha.position_doctor_project.domain.position.entity.Position;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,5 +17,6 @@ public interface PositionRepository extends JpaRepository<Position, UUID> {
 
     List<Position> findByPortfolioId(UUID portfolioId);
 
+    @EntityGraph(attributePaths = {"portfolio", "portfolio.user"})
     List<Position> findByStatus(PositionStatus status);
 }

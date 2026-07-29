@@ -76,7 +76,7 @@ class PortfolioControllerTest {
     @Test
     @DisplayName("POST /api/v1/portfolios - Success Scenario")
     void testCreatePortfolio_Success() throws Exception {
-        String jsonPayload = String.format("{\"userId\":\"%s\",\"name\":\"Growth Portfolio\",\"description\":\"Tech & Blue Chip Stock Holdings\",\"currency\":\"USD\"}", sampleUserId);
+        String jsonPayload = "{\"name\":\"Growth Portfolio\",\"description\":\"Tech & Blue Chip Stock Holdings\",\"currency\":\"USD\"}";
 
         when(portfolioService.createPortfolio(any(CreatePortfolioRequest.class))).thenReturn(sampleResponse);
 
