@@ -23,6 +23,9 @@ public class DiagnosisEngine {
         RiskLevel riskLevel = determineRiskLevel(healthScore);
         RecommendationResponse rec = recommendationEngine.generateRecommendation(position, healthScore);
 
+        // DiagnosisEngine is the Single Source of Truth for Risk Assessment
+        position.setRiskLevel(riskLevel);
+
         return PositionHealthReport.builder()
                 .positionId(position.getId())
                 .symbol(position.getSymbol())
@@ -30,6 +33,7 @@ public class DiagnosisEngine {
                 .riskLevel(riskLevel)
                 .recommendation(RecommendationAction.valueOf(rec.getRecommendation().name()))
                 .reason(rec.getReason())
+                .actions(rec.getActions())
                 .build();
     }
 

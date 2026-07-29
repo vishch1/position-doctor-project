@@ -111,6 +111,7 @@ export interface PositionHealthReport {
   riskLevel: RiskLevel;
   recommendation: RecommendationAction;
   reason: string;
+  actions?: string[];
 }
 
 export interface RecommendationResponse {
@@ -119,6 +120,7 @@ export interface RecommendationResponse {
   recommendation: RecommendationType;
   confidence: number; // 0 to 100
   reason: string;
+  actions?: string[];
 }
 
 export type AlertSeverity = 'INFO' | 'WARNING' | 'CRITICAL';

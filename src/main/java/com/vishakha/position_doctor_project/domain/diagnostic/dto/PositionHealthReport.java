@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -23,4 +24,5 @@ public class PositionHealthReport {
     private RiskLevel riskLevel;
     private RecommendationAction recommendation;
     private String reason;
+    private List<String> actions;
 }

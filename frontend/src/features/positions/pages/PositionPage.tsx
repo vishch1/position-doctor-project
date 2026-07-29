@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { positionApi } from '../../../api/positionApi';
 import { portfolioApi } from '../../../api/portfolioApi';
-import { Exchange, PositionType } from '../../../types';
+import { Exchange, PositionType, PositionResponse } from '../../../types';
 import { RiskBadge } from '../../../components/common/RiskBadge';
 import { LoadingSkeleton } from '../../../components/common/LoadingSkeleton';
 import { EmptyState } from '../../../components/common/EmptyState';
 import { ConfirmationDialog } from '../../../components/common/ConfirmationDialog';
+import { ActionExecutionModal } from '../../../components/common/ActionExecutionModal';
 import { useNavigate } from 'react-router-dom';
 import {
   TrendingUp,
@@ -28,6 +29,10 @@ export const PositionPage: React.FC = () => {
   const [exchangeFilter, setExchangeFilter] = useState<string>('ALL');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [activeActionModal, setActiveActionModal] = useState<{
+    pos: PositionResponse;
+    actionType: string;
+  } | null>(null);
 
   // Form states for new position
   const [portfolioId, setPortfolioId] = useState('');
@@ -189,57 +194,98 @@ export const PositionPage: React.FC = () => {
                   const currentPrice = pos.currentPrice || pos.entryPrice;
 
                   return (
-                    <tr
-                      key={pos.id}
-                      className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition group"
-                    >
-                      <td className="py-4 px-5">
-                        <div className="flex items-center space-x-2">
-                          <span className="font-black text-sm text-slate-900 dark:text-white">
-                            {pos.symbol}
+                    <React.Fragment key={pos.id}>
+                      <tr className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition">
+                        <td className="py-4 px-5">
+                          <div className="flex items-center space-x-2">
+                            <span className="font-black text-sm text-slate-900 dark:text-white">
+                              {pos.symbol}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-5 text-slate-500 font-bold">{pos.exchange}</td>
+                        <td className="py-4 px-5">
+                          <span
+                            className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${
+                              pos.positionType === 'LONG'
+                                ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                                : 'bg-purple-500/10 text-purple-600 dark:text-purple-400'
+                            }`}
+                          >
+                            {pos.positionType}
                           </span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-5 text-slate-500 font-bold">{pos.exchange}</td>
-                      <td className="py-4 px-5">
-                        <span
-                          className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${
-                            pos.positionType === 'LONG'
-                              ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                              : 'bg-purple-500/10 text-purple-600 dark:text-purple-400'
-                          }`}
-                        >
-                          {pos.positionType}
-                        </span>
-                      </td>
-                      <td className="py-4 px-5 text-slate-900 dark:text-slate-200">{pos.quantity}</td>
-                      <td className="py-4 px-5 text-slate-600 dark:text-slate-400">${pos.entryPrice?.toFixed(2)}</td>
-                      <td className="py-4 px-5 font-bold text-slate-900 dark:text-white">
-                        ${currentPrice?.toFixed(2)}
-                      </td>
-                      <td className={`py-4 px-5 font-extrabold ${isGain ? 'text-emerald-500' : 'text-rose-500'}`}>
-                        {isGain ? '+' : ''}${pos.unrealizedPnL?.toFixed(2)}
-                      </td>
-                      <td className="py-4 px-5">
-                        <RiskBadge level={pos.riskLevel} />
-                      </td>
-                      <td className="py-4 px-5 text-right space-x-2">
-                        <button
-                          onClick={() => navigate(`/diagnosis/${pos.id}`)}
-                          className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition inline-flex items-center space-x-1 shadow-sm"
-                        >
-                          <HeartPulse className="w-3.5 h-3.5" />
-                          <span>Diagnose</span>
-                        </button>
-                        <button
-                          onClick={() => setDeletingId(pos.id)}
-                          className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 transition"
-                          title="Delete Position"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </td>
-                    </tr>
+                        </td>
+                        <td className="py-4 px-5 text-slate-900 dark:text-slate-200">{pos.quantity}</td>
+                        <td className="py-4 px-5 text-slate-600 dark:text-slate-400">${pos.entryPrice?.toFixed(2)}</td>
+                        <td className="py-4 px-5 font-bold text-slate-900 dark:text-white">
+                          ${currentPrice?.toFixed(2)}
+                        </td>
+                        <td className={`py-4 px-5 font-extrabold ${isGain ? 'text-emerald-500' : 'text-rose-500'}`}>
+                          {isGain ? '+' : ''}${pos.unrealizedPnL?.toFixed(2)}
+                        </td>
+                        <td className="py-4 px-5">
+                          <RiskBadge level={pos.riskLevel} />
+                        </td>
+                        <td className="py-4 px-5 text-right space-x-2">
+                          <button
+                            onClick={() => navigate(`/diagnosis/${pos.id}`)}
+                            className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition inline-flex items-center space-x-1 shadow-sm cursor-pointer"
+                          >
+                            <HeartPulse className="w-3.5 h-3.5" />
+                            <span>Diagnose</span>
+                          </button>
+                          <button
+                            onClick={() => setDeletingId(pos.id)}
+                            className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 transition cursor-pointer"
+                            title="Delete Position"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+
+                      {/* Quick Action Bar below position */}
+                      <tr className="bg-slate-50/50 dark:bg-slate-800/20 border-b border-slate-100 dark:border-slate-800">
+                        <td colSpan={9} className="px-5 py-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest flex items-center space-x-1">
+                              <span>Quick Action Bar:</span>
+                            </span>
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => {
+                                  if (portfolios.length > 0) setPortfolioId(portfolios[0].id);
+                                  setSymbol(pos.symbol);
+                                  setIsCreateOpen(true);
+                                }}
+                                className="px-2.5 py-1 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold text-[11px] transition flex items-center space-x-1 cursor-pointer"
+                              >
+                                <Plus className="w-3 h-3" />
+                                <span>Add Position</span>
+                              </button>
+                              <button
+                                onClick={() => setActiveActionModal({ pos, actionType: 'BOOK_PROFIT' })}
+                                className="px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-[11px] transition flex items-center space-x-1 cursor-pointer"
+                              >
+                                <span>Book Profit</span>
+                              </button>
+                              <button
+                                onClick={() => setActiveActionModal({ pos, actionType: 'EDIT_STOP_LOSS' })}
+                                className="px-2.5 py-1 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 text-orange-600 dark:text-orange-400 font-bold text-[11px] transition flex items-center space-x-1 cursor-pointer"
+                              >
+                                <span>Edit Stop Loss</span>
+                              </button>
+                              <button
+                                onClick={() => setActiveActionModal({ pos, actionType: 'EXIT_POSITION' })}
+                                className="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 font-bold text-[11px] transition flex items-center space-x-1 cursor-pointer"
+                              >
+                                <span>Exit Position</span>
+                              </button>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    </React.Fragment>
                   );
                 })}
               </tbody>
@@ -431,6 +477,13 @@ export const PositionPage: React.FC = () => {
         confirmText="Delete"
         onConfirm={() => deletingId && deleteMutation.mutate(deletingId)}
         onCancel={() => setDeletingId(null)}
+      />
+      {/* Action Execution Modal */}
+      <ActionExecutionModal
+        isOpen={!!activeActionModal}
+        onClose={() => setActiveActionModal(null)}
+        position={activeActionModal?.pos || null}
+        actionType={activeActionModal?.actionType || ''}
       />
     </div>
   );

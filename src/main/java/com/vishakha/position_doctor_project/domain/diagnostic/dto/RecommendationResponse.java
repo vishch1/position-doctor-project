@@ -5,10 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
- * Output DTO for Actionable Position Recommendation.
+ * Output DTO for Actionable Position Recommendation with actionable next steps.
  */
 @Data
 @Builder
@@ -21,4 +22,5 @@ public class RecommendationResponse {
     private RecommendationType recommendation;
     private int confidence; // Range: 0 to 100
     private String reason;
+    private List<String> actions;
 }

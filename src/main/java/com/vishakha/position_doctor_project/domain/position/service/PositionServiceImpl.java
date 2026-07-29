@@ -12,10 +12,10 @@ import com.vishakha.position_doctor_project.domain.position.dto.UpdatePositionRe
 import com.vishakha.position_doctor_project.domain.position.entity.Position;
 import com.vishakha.position_doctor_project.domain.position.repository.PositionRepository;
 import lombok.RequiredArgsConstructor;
+import com.vishakha.position_doctor_project.domain.alert.repository.AlertRepository;
+import com.vishakha.position_doctor_project.domain.diagnostic.engine.DiagnosisEngine;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.vishakha.position_doctor_project.domain.alert.repository.AlertRepository;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -33,6 +33,7 @@ public class PositionServiceImpl implements PositionService {
     private final PositionRepository positionRepository;
     private final PortfolioRepository portfolioRepository;
     private final AlertRepository alertRepository;
+    private final DiagnosisEngine diagnosisEngine;
 
     @Override
     public PositionResponse createPosition(CreatePositionRequest request) {
@@ -53,6 +54,9 @@ public class PositionServiceImpl implements PositionService {
                 .status(PositionStatus.OPEN)            // Rule: status = OPEN on creation
                 .riskLevel(RiskLevel.MODERATE)
                 .build();
+
+        // Single Source of Truth Risk Evaluation via DiagnosisEngine
+        diagnosisEngine.generateReport(position);
 
         Position savedPosition = positionRepository.save(position);
         return mapToResponse(savedPosition);
@@ -126,6 +130,9 @@ public class PositionServiceImpl implements PositionService {
                     )
             );
         }
+
+        // Single Source of Truth Risk Evaluation via DiagnosisEngine
+        diagnosisEngine.generateReport(position);
 
         Position updatedPosition = positionRepository.save(position);
         return mapToResponse(updatedPosition);

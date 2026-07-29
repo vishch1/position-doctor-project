@@ -11,6 +11,7 @@ import com.vishakha.position_doctor_project.domain.diagnostic.dto.PositionHealth
 import com.vishakha.position_doctor_project.domain.diagnostic.dto.RecommendationAction;
 import com.vishakha.position_doctor_project.domain.diagnostic.dto.RecommendationResponse;
 import com.vishakha.position_doctor_project.domain.diagnostic.dto.RecommendationType;
+import com.vishakha.position_doctor_project.domain.diagnostic.engine.DiagnosisEngine;
 import com.vishakha.position_doctor_project.domain.diagnostic.service.DiagnosisService;
 import com.vishakha.position_doctor_project.domain.diagnostic.service.RecommendationService;
 import com.vishakha.position_doctor_project.domain.portfolio.dto.CreatePortfolioRequest;
@@ -64,6 +65,9 @@ class RiskLevelBackendTest {
 
     @Mock
     private AlertRepository alertRepository;
+
+    @Mock
+    private DiagnosisEngine diagnosisEngine;
 
     @InjectMocks
     private PositionServiceImpl positionService;

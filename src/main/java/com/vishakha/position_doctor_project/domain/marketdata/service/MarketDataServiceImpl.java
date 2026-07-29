@@ -3,6 +3,7 @@ package com.vishakha.position_doctor_project.domain.marketdata.service;
 import com.vishakha.position_doctor_project.common.dto.Exchange;
 import com.vishakha.position_doctor_project.common.dto.PositionStatus;
 import com.vishakha.position_doctor_project.common.util.FinancialCalculatorUtils;
+import com.vishakha.position_doctor_project.domain.diagnostic.engine.DiagnosisEngine;
 import com.vishakha.position_doctor_project.domain.marketdata.dto.MarketQuoteDto;
 import com.vishakha.position_doctor_project.domain.marketdata.provider.MarketDataProvider;
 import com.vishakha.position_doctor_project.domain.position.entity.Position;
@@ -29,6 +30,7 @@ public class MarketDataServiceImpl implements MarketDataService {
 
     private final MarketDataProvider marketDataProvider;
     private final PositionRepository positionRepository;
+    private final DiagnosisEngine diagnosisEngine;
 
     @Override
     @Transactional(readOnly = true)
@@ -82,8 +84,11 @@ public class MarketDataServiceImpl implements MarketDataService {
             );
             position.setUnrealizedPnL(updatedPnL);
 
-            log.info("Market Update -> Position [{}] Symbol: {} ({}) | Old Price: {} -> New Price: {} | Unrealized PnL: {}",
-                    position.getId(), position.getSymbol(), position.getExchange(), oldPrice, newPrice, updatedPnL);
+            // Single Source of Truth Risk Evaluation via DiagnosisEngine
+            diagnosisEngine.generateReport(position);
+
+            log.info("Market Update -> Position [{}] Symbol: {} ({}) | Old Price: {} -> New Price: {} | RiskLevel: {} | Unrealized PnL: {}",
+                    position.getId(), position.getSymbol(), position.getExchange(), oldPrice, newPrice, position.getRiskLevel(), updatedPnL);
         }
 
         positionRepository.saveAll(openPositions);

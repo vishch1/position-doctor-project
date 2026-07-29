@@ -1,12 +1,14 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { dashboardApi } from '../../../api/dashboardApi';
 import { StatCard } from '../../../components/common/StatCard';
 import { HealthGauge } from '../../../components/common/HealthGauge';
 import { RiskBadge } from '../../../components/common/RiskBadge';
 import { RecommendationBadge } from '../../../components/common/RecommendationBadge';
+import { ActionExecutionModal } from '../../../components/common/ActionExecutionModal';
 import { LoadingSkeleton } from '../../../components/common/LoadingSkeleton';
 import { EmptyState } from '../../../components/common/EmptyState';
+import { PositionResponse, RecommendationAction } from '../../../types';
 import { useNavigate } from 'react-router-dom';
 import {
   TrendingUp,
@@ -15,9 +17,12 @@ import {
   HeartPulse,
   ArrowUpRight,
   ShieldCheck,
-  AlertTriangle,
   ChevronRight,
   Sparkles,
+  RefreshCw,
+  PlusCircle,
+  Lock,
+  AlertOctagon,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -33,6 +38,14 @@ import {
 
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const [executionModalState, setExecutionModalState] = useState<{
+    isOpen: boolean;
+    position: PositionResponse | null;
+    actionType: string;
+    recAction?: RecommendationAction;
+  }>({ isOpen: false, position: null, actionType: '' });
 
   const { data: dashboardData, isLoading, error } = useQuery({
     queryKey: ['dashboardSummary'],
@@ -53,8 +66,7 @@ export const DashboardPage: React.FC = () => {
     );
   }
 
-  const { portfolioSummary, healthSummary, recentAlerts, recommendations, openPositions } =
-    dashboardData.data;
+  const { portfolioSummary, healthSummary, recommendations, openPositions } = dashboardData.data;
 
   // Mock trend data for area chart
   const trendData = [
@@ -73,6 +85,100 @@ export const DashboardPage: React.FC = () => {
 
   const isPositivePnL = (portfolioSummary?.totalUnrealizedPnL || 0) >= 0;
 
+  // Derive recommendation action for position
+  const getPositionRecommendation = (posId: string): RecommendationAction => {
+    if (recommendations && recommendations.length > 0) {
+      const rec = recommendations.find((r) => r.positionId === posId);
+      if (rec) return rec.recommendation;
+    }
+    return 'HOLD';
+  };
+
+  // Requirement 3: Primary CTA button matched to recommendation
+  const renderPrimaryActionCTA = (pos: PositionResponse, recAction: RecommendationAction) => {
+    switch (recAction) {
+      case 'EXIT':
+        return (
+          <button
+            onClick={() =>
+              setExecutionModalState({
+                isOpen: true,
+                position: pos,
+                actionType: 'EXIT_POSITION',
+                recAction,
+              })
+            }
+            className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-md shadow-rose-500/20 transition cursor-pointer flex items-center space-x-1"
+          >
+            <AlertOctagon className="w-3.5 h-3.5" />
+            <span>Exit Position</span>
+          </button>
+        );
+      case 'BOOK_PROFIT':
+        return (
+          <button
+            onClick={() =>
+              setExecutionModalState({
+                isOpen: true,
+                position: pos,
+                actionType: 'BOOK_PROFIT',
+                recAction,
+              })
+            }
+            className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-md shadow-amber-500/20 transition cursor-pointer flex items-center space-x-1"
+          >
+            <DollarSign className="w-3.5 h-3.5" />
+            <span>Book Profit</span>
+          </button>
+        );
+      case 'ADD':
+        return (
+          <button
+            onClick={() =>
+              setExecutionModalState({
+                isOpen: true,
+                position: pos,
+                actionType: 'BUY_MORE',
+                recAction,
+              })
+            }
+            className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition cursor-pointer flex items-center space-x-1"
+          >
+            <PlusCircle className="w-3.5 h-3.5" />
+            <span>Buy More</span>
+          </button>
+        );
+      case 'TIGHTEN_STOPLOSS':
+        return (
+          <button
+            onClick={() =>
+              setExecutionModalState({
+                isOpen: true,
+                position: pos,
+                actionType: 'EDIT_STOP_LOSS',
+                recAction,
+              })
+            }
+            className="px-3 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition cursor-pointer flex items-center space-x-1"
+          >
+            <Lock className="w-3.5 h-3.5" />
+            <span>Edit Stop Loss</span>
+          </button>
+        );
+      case 'HOLD':
+      default:
+        return (
+          <button
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['dashboardSummary'] })}
+            className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-500/20 transition cursor-pointer flex items-center space-x-1"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Refresh</span>
+          </button>
+        );
+    }
+  };
+
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Top Banner & Quick Vitals */}
@@ -89,7 +195,7 @@ export const DashboardPage: React.FC = () => {
 
         <button
           onClick={() => navigate('/positions')}
-          className="px-5 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-500/25 transition-all hover:scale-105 active:scale-95 flex items-center space-x-2"
+          className="px-5 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg shadow-blue-500/25 transition-all hover:scale-105 active:scale-95 flex items-center space-x-2 cursor-pointer"
         >
           <span>Examine Positions</span>
           <ArrowUpRight className="w-4 h-4" />
@@ -98,105 +204,83 @@ export const DashboardPage: React.FC = () => {
 
       {/* Hero Stats & Health Gauge Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Large Gradient Portfolio Value Card */}
-        <div className="lg:col-span-2 p-8 rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-slate-900 text-white shadow-xl shadow-blue-500/20 relative overflow-hidden flex flex-col justify-between min-h-[220px]">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="flex items-center justify-between z-10">
-            <span className="text-xs font-bold uppercase tracking-widest text-blue-200">
-              Total Portfolio Value
-            </span>
-            <div className="p-2 rounded-xl bg-white/10 backdrop-blur-md">
-              <DollarSign className="w-5 h-5 text-blue-200" />
-            </div>
+        {/* Left: Overall Health Score */}
+        <div className="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center relative overflow-hidden">
+          <div className="absolute top-3 left-4 flex items-center space-x-1.5 text-xs font-bold text-slate-400 uppercase tracking-widest">
+            <Activity className="w-4 h-4 text-blue-500" />
+            <span>Portfolio Health Index</span>
           </div>
 
-          <div className="z-10 my-4">
-            <h1 className="text-4xl sm:text-5xl font-black tracking-tight">
-              ${portfolioSummary?.totalPortfolioValue?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || '0.00'}
-            </h1>
-            <div className="flex items-center space-x-3 mt-3">
-              <span
-                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold ${
-                  isPositivePnL ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
-                }`}
-              >
-                {isPositivePnL ? '+' : ''}${portfolioSummary?.totalUnrealizedPnL?.toFixed(2)} Total P&L
-              </span>
-              <span className="text-xs text-blue-200 font-semibold">
-                Today P&L: ${portfolioSummary?.todayPnL?.toFixed(2)}
-              </span>
-            </div>
+          <div className="scale-125 my-6">
+            <HealthGauge score={healthSummary?.averageHealthScore || 75} size="lg" />
           </div>
 
-          <div className="z-10 flex items-center justify-between text-xs text-blue-200/80 pt-4 border-t border-white/10">
-            <span>Active Positions: {openPositions?.length || 0}</span>
-            <span>Finnhub Live Stream Enabled</span>
+          <div className="w-full pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between text-xs font-bold">
+            <span className="text-slate-400">System Diagnosis:</span>
+            <RiskBadge level={healthSummary?.aggregatedRiskLevel || 'MODERATE'} />
           </div>
         </div>
 
-        {/* AI Health Score Card */}
-        <div className="p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center justify-center text-center relative overflow-hidden">
-          <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-4">
-            Overall Health Score
-          </h3>
-          <div className="scale-125 my-2">
-            <HealthGauge score={healthSummary?.overallHealthScore || 100} size="lg" />
-          </div>
-
-          <div className="grid grid-cols-3 gap-2 w-full mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 text-center">
-            <div>
-              <span className="block text-xs font-bold text-emerald-500">
-                {healthSummary?.healthyPositions || 0}
-              </span>
-              <span className="text-[10px] text-slate-400 font-medium uppercase">Healthy</span>
-            </div>
-            <div>
-              <span className="block text-xs font-bold text-amber-500">
-                {healthSummary?.warningPositions || 0}
-              </span>
-              <span className="text-[10px] text-slate-400 font-medium uppercase">Warning</span>
-            </div>
-            <div>
-              <span className="block text-xs font-bold text-rose-500">
-                {healthSummary?.criticalPositions || 0}
-              </span>
-              <span className="text-[10px] text-slate-400 font-medium uppercase">Critical</span>
-            </div>
-          </div>
+        {/* Middle: Key Financial Metrics */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:col-span-2">
+          <StatCard
+            title="Total Portfolio Value"
+            value={`$${(portfolioSummary?.totalPortfolioValue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
+            trend="+2.4%"
+            isPositive={true}
+            icon={<DollarSign className="w-5 h-5 text-blue-600 dark:text-blue-400" />}
+          />
+          <StatCard
+            title="Total Investment"
+            value={`$${(portfolioSummary?.totalInvestment || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
+            icon={<TrendingUp className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
+          />
+          <StatCard
+            title="Unrealized P&L"
+            value={`${isPositivePnL ? '+' : ''}$${(portfolioSummary?.totalUnrealizedPnL || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
+            isPositive={isPositivePnL}
+            icon={<Activity className={`w-5 h-5 ${isPositivePnL ? 'text-emerald-500' : 'text-rose-500'}`} />}
+          />
+          <StatCard
+            title="Open Positions Monitored"
+            value={`${portfolioSummary?.openPositionsCount || 0}`}
+            icon={<ShieldCheck className="w-5 h-5 text-emerald-500" />}
+          />
         </div>
       </div>
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Performance Area Chart */}
-        <div className="lg:col-span-2 p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-              Portfolio Growth Trend
-            </h3>
-            <span className="text-xs font-semibold text-blue-500">Last 7 Days</span>
+        {/* Portfolio Growth Trend */}
+        <div className="lg:col-span-2 p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                Portfolio Value Trend
+              </h3>
+              <span className="text-xs text-slate-400 font-semibold">5-Day Live Performance Tracking</span>
+            </div>
           </div>
 
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={trendData}>
                 <defs>
-                  <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="name" stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} />
+                <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} />
+                <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
                 <Tooltip />
-                <Area type="monotone" dataKey="value" stroke="#2563eb" strokeWidth={3} fillOpacity={1} fill="url(#colorVal)" />
+                <Area type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorValue)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Risk Allocation Pie Chart */}
+        {/* Health Distribution Pie Chart */}
         <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
           <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-2">
             Health Distribution
@@ -229,7 +313,7 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Recent AI Prescriptions & Open Positions Table */}
+      {/* Requirement 3: Diagnosed Positions & Actionable Advice */}
       <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -240,9 +324,9 @@ export const DashboardPage: React.FC = () => {
           </div>
           <button
             onClick={() => navigate('/positions')}
-            className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center"
+            className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center cursor-pointer"
           >
-            <span>View All</span>
+            <span>View All Positions</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
@@ -257,12 +341,15 @@ export const DashboardPage: React.FC = () => {
                   <th className="py-3 px-4 font-bold">Price</th>
                   <th className="py-3 px-4 font-bold">Unrealized P&L</th>
                   <th className="py-3 px-4 font-bold">Risk Level</th>
-                  <th className="py-3 px-4 font-bold text-right">Action</th>
+                  <th className="py-3 px-4 font-bold">AI Recommendation</th>
+                  <th className="py-3 px-4 font-bold text-right">Primary Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-semibold">
                 {openPositions.map((pos) => {
                   const isGain = (pos.unrealizedPnL || 0) >= 0;
+                  const recAction = getPositionRecommendation(pos.id);
+
                   return (
                     <tr key={pos.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
                       <td className="py-3.5 px-4 font-black text-slate-900 dark:text-white">{pos.symbol}</td>
@@ -274,13 +361,11 @@ export const DashboardPage: React.FC = () => {
                       <td className="py-3.5 px-4">
                         <RiskBadge level={pos.riskLevel} />
                       </td>
+                      <td className="py-3.5 px-4">
+                        <RecommendationBadge action={recAction} />
+                      </td>
                       <td className="py-3.5 px-4 text-right">
-                        <button
-                          onClick={() => navigate(`/diagnosis/${pos.id}`)}
-                          className="px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold transition"
-                        >
-                          Diagnose
-                        </button>
+                        {renderPrimaryActionCTA(pos, recAction)}
                       </td>
                     </tr>
                   );
@@ -297,6 +382,17 @@ export const DashboardPage: React.FC = () => {
           />
         )}
       </div>
+
+      {/* Action Execution Modal */}
+      {executionModalState.position && (
+        <ActionExecutionModal
+          isOpen={executionModalState.isOpen}
+          onClose={() => setExecutionModalState({ isOpen: false, position: null, actionType: '' })}
+          position={executionModalState.position}
+          actionType={executionModalState.actionType}
+          recommendationAction={executionModalState.recAction}
+        />
+      )}
     </div>
   );
 };

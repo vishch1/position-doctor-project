@@ -138,6 +138,115 @@
 					]
 				}
 			]
+		},
+		{
+			"name": "Historical Portfolio Tracking Module",
+			"item": [
+				{
+					"name": "Get Portfolio History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/history/{{portfolioId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"history",
+								"{{portfolioId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Portfolio History (30 Days Filter)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/history/{{portfolioId}}?days=30",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"history",
+								"{{portfolioId}}"
+							],
+							"query": [
+								{
+									"key": "days",
+									"value": "30"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Latest Portfolio Snapshot",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/history/{{portfolioId}}/latest",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"history",
+								"{{portfolioId}}",
+								"latest"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Portfolio Chart & Performance Analytics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/history/{{portfolioId}}/chart",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"history",
+								"{{portfolioId}}",
+								"chart"
+							]
+						}
+					}
+				}
+			]
 		}
 	],
 	"variable": [

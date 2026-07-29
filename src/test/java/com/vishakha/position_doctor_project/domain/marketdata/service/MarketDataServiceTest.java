@@ -3,6 +3,7 @@ package com.vishakha.position_doctor_project.domain.marketdata.service;
 import com.vishakha.position_doctor_project.common.dto.Exchange;
 import com.vishakha.position_doctor_project.common.dto.PositionStatus;
 import com.vishakha.position_doctor_project.common.dto.PositionType;
+import com.vishakha.position_doctor_project.domain.diagnostic.engine.DiagnosisEngine;
 import com.vishakha.position_doctor_project.domain.marketdata.provider.MarketDataProvider;
 import com.vishakha.position_doctor_project.domain.position.entity.Position;
 import com.vishakha.position_doctor_project.domain.position.repository.PositionRepository;
@@ -33,6 +34,9 @@ class MarketDataServiceTest {
 
     @Mock
     private PositionRepository positionRepository;
+
+    @Mock
+    private DiagnosisEngine diagnosisEngine;
 
     @InjectMocks
     private MarketDataServiceImpl marketDataService;
