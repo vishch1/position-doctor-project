@@ -8,7 +8,7 @@ import { RecommendationBadge } from '../../../components/common/RecommendationBa
 import { ActionExecutionModal } from '../../../components/common/ActionExecutionModal';
 import { LoadingSkeleton } from '../../../components/common/LoadingSkeleton';
 import { EmptyState } from '../../../components/common/EmptyState';
-import { PositionResponse, RecommendationAction } from '../../../types';
+import { PositionResponse, RecommendationAction, RiskLevel } from '../../../types';
 import { useNavigate } from 'react-router-dom';
 import {
   TrendingUp,
@@ -84,6 +84,16 @@ export const DashboardPage: React.FC = () => {
   ];
 
   const isPositivePnL = (portfolioSummary?.totalUnrealizedPnL || 0) >= 0;
+
+  const getAggregatedRiskLevel = (): RiskLevel => {
+    if (healthSummary?.criticalPositions && healthSummary.criticalPositions > 0) return 'CRITICAL';
+    if (healthSummary?.warningPositions && healthSummary.warningPositions > 0) return 'HIGH';
+    const score = healthSummary?.overallHealthScore ?? 75;
+    if (score >= 80) return 'LOW';
+    if (score >= 60) return 'MODERATE';
+    if (score >= 40) return 'HIGH';
+    return 'CRITICAL';
+  };
 
   // Derive recommendation action for position
   const getPositionRecommendation = (posId: string): RecommendationAction => {
@@ -212,12 +222,12 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           <div className="scale-125 my-6">
-            <HealthGauge score={healthSummary?.averageHealthScore || 75} size="lg" />
+            <HealthGauge score={healthSummary?.overallHealthScore || 75} size="lg" />
           </div>
 
           <div className="w-full pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between text-xs font-bold">
             <span className="text-slate-400">System Diagnosis:</span>
-            <RiskBadge level={healthSummary?.aggregatedRiskLevel || 'MODERATE'} />
+            <RiskBadge level={getAggregatedRiskLevel()} />
           </div>
         </div>
 
@@ -226,13 +236,13 @@ export const DashboardPage: React.FC = () => {
           <StatCard
             title="Total Portfolio Value"
             value={`$${(portfolioSummary?.totalPortfolioValue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
-            trend="+2.4%"
+            change="2.4%"
             isPositive={true}
             icon={<DollarSign className="w-5 h-5 text-blue-600 dark:text-blue-400" />}
           />
           <StatCard
             title="Total Investment"
-            value={`$${(portfolioSummary?.totalInvestment || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
+            value={`$${((portfolioSummary?.totalPortfolioValue || 0) - (portfolioSummary?.totalUnrealizedPnL || 0)).toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
             icon={<TrendingUp className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
           />
           <StatCard
@@ -243,7 +253,7 @@ export const DashboardPage: React.FC = () => {
           />
           <StatCard
             title="Open Positions Monitored"
-            value={`${portfolioSummary?.openPositionsCount || 0}`}
+            value={`${openPositions?.length || 0}`}
             icon={<ShieldCheck className="w-5 h-5 text-emerald-500" />}
           />
         </div>
