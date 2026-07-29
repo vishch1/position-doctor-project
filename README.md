@@ -411,28 +411,6 @@ Position Doctor provides a complete RESTful API suite documented with Swagger / 
 
 ---
 
-## 🖼 Screenshots
-
-<div align="center">
-  <h3>🔐 User Authentication</h3>
-  <img src="docs/images/login.png" alt="Login Screenshot" width="800"/>
-  <br/><br/>
-  
-  <h3>📊 Interactive Executive Dashboard</h3>
-  <img src="docs/images/dashboard.png" alt="Dashboard Screenshot" width="800"/>
-  <br/><br/>
-  
-  <h3>💼 Portfolio & Position Management</h3>
-  <img src="docs/images/portfolio.png" alt="Portfolio Screenshot" width="800"/>
-  <br/><br/>
-  
-  <h3>🧠 AI Risk Diagnosis & Recommendations</h3>
-  <img src="docs/images/diagnosis.png" alt="Diagnosis Screenshot" width="800"/>
-  <br/><br/>
-  
-  <h3>🔔 Real-Time Alert Engine</h3>
-  <img src="docs/images/alerts.png" alt="Alerts Screenshot" width="800"/>
-</div>
 
 ---
 
