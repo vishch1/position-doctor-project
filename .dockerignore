@@ -1,0 +1,12 @@
+target/
+frontend/
+.git/
+.gitignore
+.idea/
+.vscode/
+node_modules/
+logs/
+*.log
+README.md
+docs/
+.DS_Store
